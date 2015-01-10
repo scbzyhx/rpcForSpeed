@@ -168,8 +168,7 @@ end
 function rpc_lookup()
 	local jsonrpc = require "luci.jsonrpc"
 	local http    = require "luci.http"
-	local ltn12   = require "luci.ltn12"
-	
+	local ltn12   = require "luci.ltn12"	
 	local lookup = {}
 	lookup.lookup = function(...)
 		--lookup the dictionary and get the delay time
