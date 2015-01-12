@@ -14,19 +14,28 @@ function ping(ip)
     --s = string.gsub(s,'[\n\r]+','')
     --print(s)
     local retval = 0
+    
+    local ttl = string.gfind(s,'ttl=%d+')
+    ttl = ttl()
+    if ttl ~= nil then
+        ttl = string.gfind(ttl,'%d+')
+        ttl = ttl()
+    else
+        ttl = 0
+    end
+
+
     local s = string.gfind(s,'time=%d+%.%d+')
-    --print(s)
     for ss in s do
-        --print(ss)
         ss = string.gfind(ss,'%d+%.%d+')
         for t in ss do
             retval = retval + tonumber(t)*1000
 
         end
     end
-    return math.floor(retval/4)
+    return math.floor(retval/4), ttl
 end
-
+--[[
 function test()
     print(ping("192.168.1.1"))
 end
@@ -38,11 +47,12 @@ local ips = {
 }
 function main()
     for k,v in pairs(ips) do
-        spdb.insert(v,ping(v))
+        --spdb.insert(v,ping(v))
+        a,b = ping(v)
+        print(a.."  "..b)
     end
 end
-print(string.format)
---test()
+test()
 main()
 
-
+]]--
