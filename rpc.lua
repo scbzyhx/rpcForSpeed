@@ -171,11 +171,36 @@ function rpc_lookup()
 	local ltn12   = require "luci.ltn12"	
 	local lookup = {}
 	lookup.lookup = function(...)
-		--lookup the dictionary and get the delay time
-		--local a ={}
-		--a["hah"] = "hehe"
-		
-		return a	
+        --arg.count = "yhx"
+        local spdb = require "luci.model.db"      
+        local env,db,err = spdb.connectToDB()
+        local retval = {}
+        if db == nil then
+            retval['error'] = {}
+            retval['error']["Message"] = 'Failed to connect to Database'
+            retval['error']["code"] = -9876
+            --return retval
+        else
+            for k,v in pairs(arg) do
+                if k ~= 'n' then
+                    local d,t,b = spdb.lookup(db,v)
+                    retval[v] = {}
+                    if d == nil then
+                        retval[v]['delay'] = 0
+                        retval[v]['ttl'] = 0
+                        retval[v]['bw'] = 0
+                    else
+                        retval[v]['delay'] = d
+                        retval[v]['ttl'] = t
+                        retval[v]['bw'] = b
+                    end
+                end
+            end
+        end
+        db:close()
+        env:close()
+		    
+		return retval	
 		-- thre return values are returned to the client
 
 	end

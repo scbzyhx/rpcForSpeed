@@ -70,12 +70,29 @@ local function delSpeed(db,ip)
     local cmd = string.format("delete from speedTable where ip = '%s'",ip)
     return db:execute(cmd)
 end
-function execute(db,cmd)
+local function execute(db,cmd)
     return db:execute(cmd)
+end
+local function lookup(db,ip)
+    --env,db,err = connectToDB()
+    if lookup == nil or db == nil or util.isValidIP(ip) == false then
+        print("invalid IP address or didn't connect to database")
+    end
+    local cmd = string.format("SELECT * FROM speedTable WHERE nw_dst = '%s'",ip)
+    local cursor,err = db:execute(cmd)
+    row = cursor:fetch({},'a')
+    -- in fact only one row
+    while row do
+        --print(string.format("%s %d %d %d",row.nw_dst,row.delay,row.ttl,row.bw))
+        --row = cursor:fetch(row,"a")
+        return row.delay,row.ttl,row.bw
+    end
+    return nil
+
 end
 
 local function insert(ip,delay,ttl,bw)
-    env,db,err = connectToDB('tmp.db')
+    local env,db,err = connectToDB('tmp.db')
     insertSpeed(db,ip,delay,ttl,bw)
     db:close()
     env:close()
@@ -83,12 +100,16 @@ end
 
 --test
 --insert("192.168.1.1",1,1,1)
+--env,db,err = connectToDB('tmp.db')
+--print(lookup(db,'192.168.1.1'))
+
 local M = {
     connectToDB = connectToDB,
     insertSpeed = insertSpeed,
     updateSpeed = updateSpeed,
     delSpeed = delSpeed,
-    insert = insert
+    insert = insert,
+    execute = execute
 }
 if modname == nil then
     spdb = M
