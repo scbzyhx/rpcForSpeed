@@ -24,8 +24,12 @@ local io = require "io"
 --require "spdb"
 
 -- ip  is a tring
-function ping(ip)
-    local cmd = "ping -c 4 -w 2 "..ip
+function ping(ip,times,timeout)
+    times = times or 4
+    timeout = timeout or 2
+
+    local cmd = "ping -c "..times.." -w "..timeout.." "..ip
+    --print(cmd)
     local f = assert(io.popen(cmd,'r'))
     local s = assert(f:read('*a'))
     f:close()
@@ -34,8 +38,18 @@ function ping(ip)
     --s = string.gsub(s,'[\n\r]+','')
     --print(s)
     local retval = 0
-    local ttl = string.gfind(s,'ttl=%d+')
-    
+    local ttl = 0
+    local ttls = string.gfind(s,'ttl=%d+')
+    --print(ttl())
+    --just once
+    for ttlWithStr in ttls do
+        ttlf = string.gfind(ttlWithStr,'%d+')
+        for t in ttlf do
+            ttl = tostring(t)
+            break
+        end
+        break
+    end
     
     local s = string.gfind(s,'time=%d+%.%d+')
     --print(s)
@@ -48,6 +62,7 @@ function ping(ip)
         end
     end
     local delay =  math.floor(retval/4)
+    return delay,ttl
 end
 
 
@@ -59,7 +74,9 @@ local function test()
     assert(isValidIP("192.168.1.1") == true)
     assert(isValidIP("192.168.1.255") == false)
     assert(isValidIP("192.168.1") == false)
+    print(ping("192.168.1.1"))
 end
+--test()
 local modname = ...
 if modname == nil then
     utils = M

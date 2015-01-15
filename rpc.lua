@@ -174,7 +174,9 @@ function rpc_lookup()
         --arg.count = "yhx"
         local spdb = require "luci.model.db"      
         local env,db,err = spdb.connectToDB()
+        local ips = {}
         local retval = {}
+        local state = false -- to show whether to send ping event
         if db == nil then
             retval['error'] = {}
             retval['error']["Message"] = 'Failed to connect to Database'
@@ -189,6 +191,8 @@ function rpc_lookup()
                         retval[v]['delay'] = 0
                         retval[v]['ttl'] = 0
                         retval[v]['bw'] = 0
+                        ips[v] = 0 -- send to ubus to get 
+                        state = true
                     else
                         retval[v]['delay'] = d
                         retval[v]['ttl'] = t
@@ -196,6 +200,12 @@ function rpc_lookup()
                     end
                 end
             end
+        end
+        if state then
+            local ubus = require "ubus"
+            local conn = ubus.connect()
+            conn:send("ping",ips)
+            conn:close()
         end
         db:close()
         env:close()
