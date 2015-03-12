@@ -33,6 +33,7 @@ function ping(ip,times,timeout)
     local f = assert(io.popen(cmd,'r'))
     local s = assert(f:read('*a'))
     f:close()
+    times = 0
     --s = string.gsub(s,'^%s+','')
     --s = string.gsub(s,'%s+$','')
     --s = string.gsub(s,'[\n\r]+','')
@@ -57,11 +58,12 @@ function ping(ip,times,timeout)
         --print(ss)
         ss = string.gfind(ss,'%d+%.%d+')
         for t in ss do
+            times = times + 1
             retval = retval + tonumber(t)*1000
 
         end
     end
-    local delay =  math.floor(retval/4)
+    local delay =  math.floor(retval/times)
     return delay,ttl
 end
 
